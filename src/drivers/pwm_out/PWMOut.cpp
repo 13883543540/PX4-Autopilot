@@ -36,7 +36,7 @@
 #include <px4_platform_common/sem.hpp>
 
 PWMOut::PWMOut() :
-	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default)//1
+	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default)
 {
 	_pwm_mask = ((1u << DIRECT_PWM_OUTPUT_CHANNELS) - 1);//½«1×óÒÆ°ËÎ»-1¼´1111 1111
 	_mixing_output.setMaxNumOutputs(DIRECT_PWM_OUTPUT_CHANNELS);
