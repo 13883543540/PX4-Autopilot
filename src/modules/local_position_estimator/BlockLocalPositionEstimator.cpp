@@ -186,7 +186,7 @@ void BlockLocalPositionEstimator::Run()
 
 	uint64_t newTimeStamp = hrt_absolute_time();
 	float dt = (newTimeStamp - _timeStamp) / 1.0e6f;
-	_timeStamp = newTimeStamp;
+	_timeStamp = newTimeStamp;//计算两次运行时间间隔dt
 
 	// set dt for all child blocks
 	setDt(dt);

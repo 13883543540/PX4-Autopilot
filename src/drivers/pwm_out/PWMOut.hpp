@@ -72,7 +72,7 @@ public:
 	int print_status() override;
 
 	bool updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
-			   unsigned num_outputs, unsigned num_control_groups_updated) override;
+			   unsigned num_outputs, unsigned num_control_groups_updated) override;//在mixer.h定义且在mixer.c中调用
 
 private:
 	void Run() override;
@@ -86,7 +86,7 @@ private:
 
 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
 
-	unsigned	_num_outputs{DIRECT_PWM_OUTPUT_CHANNELS};
+	unsigned	_num_outputs{DIRECT_PWM_OUTPUT_CHANNELS};//8
 
 	bool		_pwm_on{false};
 	uint32_t	_pwm_mask{0};

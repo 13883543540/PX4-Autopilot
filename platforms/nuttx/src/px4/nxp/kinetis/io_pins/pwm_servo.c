@@ -160,5 +160,5 @@ void
 up_pwm_servo_arm(bool armed, uint32_t channel_mask)
 {
 	io_timer_set_enable(armed, IOTimerChanMode_OneShot, channel_mask);
-	io_timer_set_enable(armed, IOTimerChanMode_PWMOut, channel_mask);
+	io_timer_set_enable(armed, IOTimerChanMode_PWMOut, channel_mask);//PWM IO≈‰÷√ƒ£ Ω
 }

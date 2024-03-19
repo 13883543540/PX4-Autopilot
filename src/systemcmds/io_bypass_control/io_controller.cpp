@@ -92,8 +92,8 @@ void IOController::setRate(uint32_t rate)
 IOController::IOController(const char *name, const px4::wq_config_t &config) :
 	px4::ScheduledWorkItem(name, config)
 {
-	up_pwm_servo_init(_pwm_mask);
-	up_pwm_servo_arm(1, _pwm_mask);
+	up_pwm_servo_init(_pwm_mask);//IOÊä³öÄ£Ê½
+	up_pwm_servo_arm(1, _pwm_mask);//IO
 }
 
 void IOController::Run()

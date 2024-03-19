@@ -36,9 +36,9 @@
 #include <px4_platform_common/sem.hpp>
 
 PWMOut::PWMOut() :
-	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default)
+	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default)//1
 {
-	_pwm_mask = ((1u << DIRECT_PWM_OUTPUT_CHANNELS) - 1);
+	_pwm_mask = ((1u << DIRECT_PWM_OUTPUT_CHANNELS) - 1);//将1左移八位-1即1111 1111
 	_mixing_output.setMaxNumOutputs(DIRECT_PWM_OUTPUT_CHANNELS);
 
 	// Getting initial parameter values
@@ -54,9 +54,9 @@ PWMOut::~PWMOut()
 	perf_free(_interval_perf);
 }
 
-bool PWMOut::update_pwm_out_state(bool on)
+bool PWMOut::update_pwm_out_state(bool on)//标志位判断
 {
-	if (on && !_pwm_initialized && _pwm_mask != 0) {
+	if (on && !_pwm_initialized && _pwm_mask != 0) {//114_pwm_initialized置为1 即执行一次
 
 		for (int timer = 0; timer < MAX_IO_TIMERS; ++timer) {
 			_timer_rates[timer] = -1;
@@ -64,7 +64,7 @@ bool PWMOut::update_pwm_out_state(bool on)
 			uint32_t channels = io_timer_get_group(timer);
 
 			if (channels == 0) {
-				continue;
+				continue;//直接跳过后续 执行下一次循环
 			}
 
 			char param_name[17];
@@ -85,7 +85,7 @@ bool PWMOut::update_pwm_out_state(bool on)
 			}
 		}
 
-		int ret = up_pwm_servo_init(_pwm_mask);
+		int ret = up_pwm_servo_init(_pwm_mask);//返回对应通道码
 
 		if (ret < 0) {
 			PX4_ERR("up_pwm_servo_init failed (%i)", ret);
@@ -129,15 +129,15 @@ bool PWMOut::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 			   unsigned num_outputs, unsigned num_control_groups_updated)
 {
 	/* output to the servos */
-	if (_pwm_initialized) {
+	if (_pwm_initialized) {//114置为1即初始化完成
 		for (size_t i = 0; i < num_outputs; i++) {
-			if (!_mixing_output.isFunctionSet(i)) {
+			if (!_mixing_output.isFunctionSet(i)) {//对没有输出的通道进行输出0
 				// do not run any signal on disabled channels
 				outputs[i] = 0;
 			}
 
 			if (_pwm_mask & (1 << i)) {
-				up_pwm_servo_set(i, outputs[i]);
+				up_pwm_servo_set(i, outputs[i]);//输出PWM
 			}
 		}
 	}
@@ -170,7 +170,7 @@ void PWMOut::Run()
 	/* update PWM status if armed or if disarmed PWM values are set */
 	bool pwm_on = true;
 
-	if (_pwm_on != pwm_on) {
+	if (_pwm_on != pwm_on) {//第一次执行57标志位判断函数 根据返回数将标志位_pwm_on置为1 即不再执行
 		if (update_pwm_out_state(pwm_on)) {
 			_pwm_on = pwm_on;
 		}
@@ -190,7 +190,7 @@ void PWMOut::Run()
 	_mixing_output.updateSubscriptions(true);
 
 	perf_end(_cycle_perf);
-	_first_update_cycle = false;
+	_first_update_cycle = false;//初始化标志位
 }
 
 int PWMOut::task_spawn(int argc, char *argv[])
@@ -219,8 +219,8 @@ void PWMOut::update_params()
 	updateParams();
 
 	// Automatically set PWM configuration when a channel is first assigned
-	if (!_first_update_cycle) {
-		for (size_t i = 0; i < _num_outputs; i++) {
+	if (!_first_update_cycle) {//第一次分配通道时的初始化 193行置0
+		for (size_t i = 0; i < _num_outputs; i++) {//1u << i （无符号值1）左移i位
 			if ((previously_set_functions & (1u << i)) == 0 && _mixing_output.functionParamHandle(i) != PARAM_INVALID) {
 				int32_t output_function;
 
@@ -251,7 +251,7 @@ void PWMOut::update_params()
 								if (param_get(handle, &tim_config) == 0 && tim_config == 400) {
 									tim_config = 50;
 									PX4_INFO("Setting timer %i to %i Hz", timer, (int)tim_config);
-									param_set(handle, &tim_config);
+									param_set(handle, &tim_config);//设为50hz
 								}
 							}
 						}
