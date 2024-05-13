@@ -47,7 +47,7 @@ WorkItemExample::~WorkItemExample()
 
 bool WorkItemExample::init()
 {
-	// execute Run() on every sensor_accel publication
+	// execute Run() on every sensor_accel publication 在每次sensor_accel publication发布时执行一次任务
 	if (!_sensor_accel_sub.registerCallback()) {
 		PX4_ERR("callback registration failed");
 		return false;

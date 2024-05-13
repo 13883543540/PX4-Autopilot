@@ -1,0 +1,5 @@
+menuconfig MODULES_MY_PWM_OUT
+	bool "my_pwm_out"
+	default n
+	---help---
+		Enable support for my_pwm_out
