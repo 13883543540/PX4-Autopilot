@@ -10,7 +10,7 @@ My_pwm_out::My_pwm_out() :
 {
 }
 
-My_pwm_out::~My_pwm_out()
+My_pwm_out::~My_pwm_out()//test
 {
 	perf_free(_loop_perf);
 	perf_free(_loop_interval_perf);
