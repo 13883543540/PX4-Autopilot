@@ -84,6 +84,10 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vtol_vehicle_status.h>
 
+#include <uORB/topics/input_rc.h>//arm新加
+
+#include <uORB/topics/my_task.h>
+
 using math::constrain;
 using systemlib::Hysteresis;
 
@@ -116,6 +120,15 @@ public:
 	void enable_hil();
 
 private:
+	void sendActuatorArmed();//arm加入
+	uORB::Subscription 				_my_task_sub{ORB_ID(my_task)};
+	my_task_s		my_task{};
+
+	uORB::Subscription	 _input_rc_sub{ORB_ID(input_rc)};
+	input_rc_s	 input_rc{};
+
+
+	bool armed_f{true};
 	void answer_command(const vehicle_command_s &cmd, uint8_t result);
 
 	transition_result_t arm(arm_disarm_reason_t calling_reason, bool run_preflight_checks = true);
@@ -200,7 +213,7 @@ private:
 
 	vehicle_status_s        _vehicle_status{};
 
-	ArmStateMachine		_arm_state_machine{};
+	ArmStateMachine		_arm_state_machine{};//将ArmStateMachine重定义 ArmStateMachine见/Arming/ArmStateMachine/ArmStateMachine.hpp
 	Failsafe		_failsafe_instance{this};
 	FailsafeBase		&_failsafe{_failsafe_instance};
 	FailureDetector		_failure_detector{this};

@@ -52,6 +52,9 @@
 #include <drivers/drv_hrt.h>
 #include <lib/mathlib/mathlib.h>
 
+#include <uORB/topics/my_task.h>
+#include <uORB/Subscription.hpp>
+
 using namespace time_literals;
 
 #define SBUS_DEBUG_LEVEL 	0 /* Set debug output level */
@@ -105,6 +108,8 @@ using namespace time_literals;
 static hrt_abstime last_rx_time;
 static hrt_abstime last_txframe_time = 0;
 
+uORB::Subscription 				_my_task_sub{ORB_ID(my_task)};
+my_task_s	 my_task{};
 #define SBUS2_FRAME_SIZE_RX_VOLTAGE	3
 #define SBUS2_FRAME_SIZE_GPS_DIGIT	3
 
@@ -644,6 +649,33 @@ sbus_decode(uint64_t frame_time, uint8_t *frame, uint16_t *values, uint16_t *num
 
 		/* convert 0-2048 values to 1000-2000 ppm encoding in a not too sloppy fashion */
 		values[channel] = (uint16_t)(value * SBUS_SCALE_FACTOR + .5f) + SBUS_SCALE_OFFSET;
+	}
+	if (_my_task_sub.updated())
+	{
+		_my_task_sub.copy(&my_task);
+	}
+	if(my_task.err_f == 0)
+	{
+		if(my_task.task_num ==1)//自动上升
+		{
+			values[2] = 1700;
+		}
+		else if(my_task.task_num == 3)//油门从怠速加速
+		{
+			values[2] = 1800;
+		}
+		else if(my_task.task_num == 4)//减速
+		{
+			values[2] = 1250;
+		}
+		else if(my_task.task_num == 5)//脱落下降
+		{
+			values[2] = 1300;
+		}
+		else if(my_task.task_num == 6)//脱落下降
+		{
+			values[2] = 1400;
+		}
 	}
 
 	/* decode switch channels if data fields are wide enough */

@@ -34,7 +34,6 @@
 #include "PWMOut.hpp"
 
 #include <px4_platform_common/sem.hpp>
-
 PWMOut::PWMOut() :
 	OutputModuleInterface(MODULE_NAME, px4::wq_configurations::hp_default)
 {
@@ -125,23 +124,62 @@ bool PWMOut::update_pwm_out_state(bool on)
 	return true;
 }
 
+void PWMOut::sendActuatorArmed(bool armed, bool force_failsafe = false, bool manual_lockdown = false, bool prearm = false)//arm加入
+{
+	actuator_armed.timestamp = hrt_absolute_time();
+	actuator_armed.armed = armed;
+	actuator_armed.ready_to_arm = true;
+	actuator_armed.force_failsafe = force_failsafe;
+	actuator_armed.manual_lockdown = manual_lockdown;
+	actuator_armed.prearmed = prearm;
+	_actuator_armed_pub.publish(actuator_armed);
+	//发布最终状态后 实时更新中间变量
+	_vehicle_status.arming_state = vehicle_status_s::ARMING_STATE_ARMED;//依然不行 或者是bool armed_f重置导致估计得看arm转换函数_arm_state == vehicle_status_s::ARMING_STATE_ARMED)
+	_vehicle_status.timestamp = hrt_absolute_time();
+	_vehicle_status.calibration_enabled = true;//新改 待测试
+	_vehicle_status_pub.publish(_vehicle_status);
+}
+
 bool PWMOut::updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 			   unsigned num_outputs, unsigned num_control_groups_updated)
 {
+	if (_my_task_sub.updated())//更新消息
+	{
+		_my_task_sub.copy(&my_task);
+	}
+	// up_pwm_servo_set(4, 2499);up_pwm_servo_set(5, 0);
+	// up_pwm_servo_set(6, 1999);up_pwm_servo_set(7, 999);
 	/* output to the servos */
-	if (_pwm_initialized) {
-		for (size_t i = 0; i < num_outputs; i++) {
+	if (_pwm_initialized) {// i原本为num_outputs
+		for (size_t i = 0; i < 4; i++) {
 			if (!_mixing_output.isFunctionSet(i)) {
 				// do not run any signal on disabled channels
 				outputs[i] = 0;
 			}
+			// if (_input_rc_sub.updated())
 
-			if (_pwm_mask & (1 << i)) {
-				up_pwm_servo_set(i, outputs[i]);
+			// {
+			// 	input_rc_s input_rc{};
+			// 	_input_rc_sub.copy(&input_rc);
+			if( my_task.stop_switch)//急停
+			{
+				up_pwm_servo_set(i, 1000);
 			}
+			else if((my_task.task_num == 2 || my_task.task_num == 3|| my_task.task_num == 4) && my_task.err_f == 0)//吸附固定转速
+			{
+				up_pwm_servo_set(i, my_task.output);
+			}
+			else if (_pwm_mask & (1 << i))
+			{
+				armed_f=0;
+				up_pwm_servo_set(i, outputs[i]);//输出PWM
+			}
+			// if (_pwm_mask & (1 << i)) {
+			// 	up_pwm_servo_set(i, outputs[i]);//输出PWM
+			// }
+			// }
 		}
 	}
-
 	/* Trigger all timer's channels in Oneshot mode to fire
 	 * the oneshots with updated values.
 	 */
@@ -188,7 +226,6 @@ void PWMOut::Run()
 
 	// check at end of cycle (updateSubscriptions() can potentially change to a different WorkQueue thread)
 	_mixing_output.updateSubscriptions(true);
-
 	perf_end(_cycle_perf);
 	_first_update_cycle = false;
 }

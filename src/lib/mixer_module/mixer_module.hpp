@@ -59,6 +59,7 @@
 #include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/actuator_outputs.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/input_rc.h>
 
 using namespace time_literals;
 

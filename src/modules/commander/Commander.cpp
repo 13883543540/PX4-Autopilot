@@ -1612,6 +1612,31 @@ void Commander::updateParameters()
 	}
 
 }
+void Commander::sendActuatorArmed()//arm加入
+{
+	if (_my_task_sub.updated())//更新消息
+	{
+		_my_task_sub.copy(&my_task);
+	}
+	if(my_task.task_num ==2 && armed_f == 1)//上锁  后续加入判断解锁上锁与否 否则重复命令
+	{
+		send_vehicle_command(vehicle_command_s::VEHICLE_CMD_COMPONENT_ARM_DISARM,
+				     static_cast<float>(vehicle_command_s::ARMING_ACTION_DISARM)
+				);
+		armed_f = 0;
+	}
+	else if(my_task.task_num ==3 && armed_f == 0)//解锁
+	{
+		send_vehicle_command(vehicle_command_s::VEHICLE_CMD_COMPONENT_ARM_DISARM,
+					static_cast<float>(vehicle_command_s::ARMING_ACTION_ARM)
+				);
+		armed_f = 1;
+	}
+	if((my_task.stop_switch && my_task.beep_f) || my_task.err_f)
+	{
+		tune_mission_warn(true);
+	}
+}
 
 void Commander::run()
 {
@@ -1667,6 +1692,8 @@ void Commander::run()
 		/* Update OA parameter */
 		_vehicle_status.avoidance_system_required = _param_com_obs_avoid.get();
 
+		sendActuatorArmed();//arm加入
+
 		handlePowerButtonState();
 
 		systemPowerUpdate();
@@ -1679,21 +1706,21 @@ void Commander::run()
 
 		_home_position.update(_param_com_home_en.get(), !_arm_state_machine.isArmed() && _vehicle_land_detected.landed);
 
-		handleAutoDisarm();
+		handleAutoDisarm();//检测着地与怠速超时自动上锁
 
 		battery_status_check();
 
 		/* If in INIT state, try to proceed to STANDBY state */
-		if (!_vehicle_status.calibration_enabled && _arm_state_machine.isInit()) {
-
-			_arm_state_machine.arming_state_transition(_vehicle_status,
+		if (!_vehicle_status.calibration_enabled && _arm_state_machine.isInit()) {//calibration_enabled == 0且 isInit() == 1
+														//即_arm_state == vehicle_status_s::ARMING_STATE_INIT
+			_arm_state_machine.arming_state_transition(_vehicle_status,				//已给为ARMING_STATE_ARMED = 2
 					vehicle_status_s::ARMING_STATE_STANDBY, _actuator_armed, _health_and_arming_checks,
 					true /* fRunPreArmChecks */, &_mavlink_log_pub, arm_disarm_reason_t::transition_to_standby);
 		}
 
-		checkForMissionUpdate();
+		checkForMissionUpdate();//任务检测
 
-		manualControlCheck();
+		manualControlCheck();//油门有大幅变化时从offboard模式切换为默认模式
 
 		offboardControlCheck();
 
@@ -1802,7 +1829,7 @@ void Commander::run()
 			_vehicle_status.timestamp = hrt_absolute_time();
 			_vehicle_status_pub.publish(_vehicle_status);
 
-			// failure_detector_status publish
+			// failure_detector_status publish//失败检测
 			failure_detector_status_s fd_status{};
 			fd_status.fd_roll = _failure_detector.getStatusFlags().roll;
 			fd_status.fd_pitch = _failure_detector.getStatusFlags().pitch;
@@ -1825,7 +1852,7 @@ void Commander::run()
 
 		_status_changed = false;
 
-		_was_armed = _arm_state_machine.isArmed();
+		_was_armed = _arm_state_machine.isArmed();//重新赋值
 
 		arm_auth_update(hrt_absolute_time(), params_updated);
 

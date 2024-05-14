@@ -549,8 +549,12 @@ void MulticopterPositionControl::Run()
 			// Publish internal position control setpoints
 			// on top of the input/feed-forward setpoints these containt the PID corrections
 			// This message is used by other modules (such as Landdetector) to determine vehicle intention.
+			// if (_input_rc_sub.updated())
+			// {
+			// 	_input_rc_sub.copy(&input_rc);
+			// }
 			vehicle_local_position_setpoint_s local_pos_sp{};
-			_control.getLocalPositionSetpoint(local_pos_sp);
+			_control.getLocalPositionSetpoint(local_pos_sp);//ÔÚPositionControl.cppÖÐ
 			local_pos_sp.timestamp = hrt_absolute_time();
 			_local_pos_sp_pub.publish(local_pos_sp);
 

@@ -36,8 +36,8 @@
 #include <systemlib/mavlink_log.h>
 
 constexpr bool
-ArmStateMachine::arming_transitions[vehicle_status_s::ARMING_STATE_MAX][vehicle_status_s::ARMING_STATE_MAX];
-
+ArmStateMachine::arming_transitions[vehicle_status_s::ARMING_STATE_MAX][vehicle_status_s::ARMING_STATE_MAX];//数组
+//返回参数 	TRANSITION_DENIED = -1,TRANSITION_NOT_CHANGED = 0,TRANSITION_CHANGED = 1
 transition_result_t ArmStateMachine::arming_state_transition(vehicle_status_s &status,
 		const arming_state_t new_arming_state, actuator_armed_s &armed, HealthAndArmingChecks &checks,
 		const bool fRunPreArmChecks, orb_advert_t *mavlink_log_pub, arm_disarm_reason_t calling_reason)
@@ -51,10 +51,10 @@ transition_result_t ArmStateMachine::arming_state_transition(vehicle_status_s &s
 	bool feedback_provided = false;
 
 	/* only check transition if the new state is actually different from the current one */
-	if (new_arming_state == _arm_state) {
+	if (new_arming_state == _arm_state) {//状态未改变
 		ret = TRANSITION_NOT_CHANGED;
 
-	} else {
+	} else {//状态改变
 		// Check that we have a valid state transition
 		bool valid_transition = arming_transitions[new_arming_state][_arm_state];
 

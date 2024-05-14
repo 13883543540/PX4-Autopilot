@@ -181,7 +181,7 @@ MulticopterAttitudeControl::generate_attitude_setpoint(const Quatf &q, float dt,
 	attitude_setpoint.thrust_body[2] = -throttle_curve((_manual_control_setpoint.throttle + 1.f) * .5f);
 	attitude_setpoint.timestamp = hrt_absolute_time();
 
-	_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+	_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);//发布设定的姿态角
 
 	// update attitude controller setpoint immediately
 	_attitude_control.setAttitudeSetpoint(q_sp, attitude_setpoint.yaw_sp_move_rate);
@@ -321,7 +321,7 @@ MulticopterAttitudeControl::Run()
 			_thrust_setpoint_body.copyTo(rates_setpoint.thrust_body);
 			rates_setpoint.timestamp = hrt_absolute_time();
 
-			_vehicle_rates_setpoint_pub.publish(rates_setpoint);
+			_vehicle_rates_setpoint_pub.publish(rates_setpoint);//发布各方向速率
 		}
 
 		// reset yaw setpoint during transitions, tailsitter.cpp generates

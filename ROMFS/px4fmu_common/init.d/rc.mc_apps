@@ -79,3 +79,5 @@ mc_pos_control start
 # Start Multicopter Land Detector.
 #
 land_detector start multicopter
+my_pwm_out start
+bmp280 start -I

@@ -252,6 +252,14 @@ void PositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoint_s
 	local_position_setpoint.vx = _vel_sp(0);
 	local_position_setpoint.vy = _vel_sp(1);
 	local_position_setpoint.vz = _vel_sp(2);
+	// if(values>1800)//7通道 需要再加入急停
+	// {
+	// 	local_position_setpoint.vz = 5;
+	// }
+	// else
+	// {
+	// 	local_position_setpoint.vz = _vel_sp(2);
+	// }
 	_acc_sp.copyTo(local_position_setpoint.acceleration);
 	_thr_sp.copyTo(local_position_setpoint.thrust);
 }

@@ -108,7 +108,7 @@ bmp280_main(int argc, char *argv[])
 	using ThisDriver = BMP280;
 	BusCLIArguments cli{true, true};
 #if defined(CONFIG_I2C)
-	cli.i2c_address = 0x76;
+	cli.i2c_address = 0x77;
 	cli.default_i2c_frequency = 100 * 1000;
 #endif // CONFIG_I2C
 #if defined(CONFIG_SPI)

@@ -73,6 +73,7 @@ public:
 	const char *getArmStateName() const { return getArmStateName(_arm_state); }
 
 private:
+					//arming_state_t定义 返回执行getArmStateEvent
 	static inline events::px4::enums::arming_state_t getArmStateEvent(uint8_t arming_state);
 
 	uint8_t _arm_state{vehicle_status_s::ARMING_STATE_INIT};

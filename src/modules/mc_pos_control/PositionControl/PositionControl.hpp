@@ -170,7 +170,7 @@ public:
 	 * @param local_position_setpoint reference to struct to fill up
 	 */
 	void getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint) const;
-
+	// void getLocalPositionSetpoint(vehicle_local_position_setpoint_s &local_position_setpoint,float values=0) const;
 	/**
 	 * Get the controllers output attitude setpoint
 	 * This attitude setpoint was generated from the resulting acceleration setpoint after position and velocity control.

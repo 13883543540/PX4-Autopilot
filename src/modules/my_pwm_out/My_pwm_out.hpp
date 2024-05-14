@@ -17,6 +17,14 @@
 #include <uORB/topics/sensor_accel.h>
 #include <uORB/topics/vehicle_status.h>
 
+#include <uORB/topics/my_task.h>
+#include <uORB/topics/distance_sensor.h>
+#include <uORB/topics/input_rc.h>
+#include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/actuator_outputs.h>
+#include <uORB/topics/sensor_baro.h>
+#include <uORB/topics/actuator_armed.h>
+
 using namespace time_literals;
 
 class My_pwm_out: public ModuleBase<My_pwm_out>, public ModuleParams, public px4::ScheduledWorkItem
@@ -40,13 +48,28 @@ public:
 
 private:
 	void Run() override;
+	float PID_realize(float ActualSpeed,float speed);//位置式
 
-	hrt_abstime	_time_stamp_last_loop{0};
-
+	my_task_s				 my_task{};
+	distance_sensor_s 			distance_sensor{};
+	input_rc_s				 input_rc{};
+	vehicle_local_position_s		vehicle_local_position{};
+	actuator_outputs_s			actuator_outputs{};
+	sensor_baro_s				sensor_baro{};
+	actuator_armed_s			actuator_armed{};
+	hrt_abstime				_time_stamp_last_loop{0};
 	// Publications
-	uORB::Publication<orb_test_s> _orb_test_pub{ORB_ID(orb_test)};
-
+	uORB::Publication<my_task_s>			_my_task_pub{ORB_ID(my_task)};
+	void Press_PID(my_task_s &my_task,sensor_baro_s &sensor_baro);
 	// Subscriptions
+	uORB::Subscription 				_my_task_sub{ORB_ID(my_task)};
+	uORB::Subscription 				_distance_sensor_sub{ORB_ID(distance_sensor)};
+	uORB::Subscription				 _input_rc_sub{ORB_ID(input_rc)};
+	uORB::Subscription				 _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
+	uORB::Subscription 				_actuator_outputs_sub{ORB_ID(actuator_outputs)};
+	uORB::Subscription 				_sensor_baro_sub{ORB_ID(sensor_baro),2};//腔体内气压
+	uORB::Subscription 				_actuator_armed_sub{ORB_ID(actuator_armed)};
+
 	uORB::SubscriptionCallbackWorkItem _sensor_accel_sub{this, ORB_ID(sensor_accel)};        // subscription that schedules WorkItemExample when updated
 	uORB::SubscriptionInterval         _parameter_update_sub{ORB_ID(parameter_update), 1_s}; // subscription limited to 1 Hz updates
 	uORB::Subscription                 _vehicle_status_sub{ORB_ID(vehicle_status)};          // regular subscription for additional data

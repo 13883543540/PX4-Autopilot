@@ -65,6 +65,8 @@
 #include <uORB/topics/vehicle_local_position.h>
 #include <uORB/topics/vehicle_local_position_setpoint.h>
 
+#include <uORB/topics/input_rc.h>//arm新加
+
 using namespace time_literals;
 
 class MulticopterPositionControl : public ModuleBase<MulticopterPositionControl>, public control::SuperBlock,
@@ -87,7 +89,9 @@ public:
 
 private:
 	void Run() override;
-
+	void sendActuatorArmed();//arm加入
+	uORB::Subscription	 _input_rc_sub{ORB_ID(input_rc)};
+	input_rc_s	 input_rc{};
 	TakeoffHandling _takeoff; /**< state machine and ramp to bring the vehicle off the ground without jumps */
 
 	orb_advert_t _mavlink_log_pub{nullptr};

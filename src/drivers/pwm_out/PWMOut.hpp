@@ -51,6 +51,14 @@
 #include <uORB/Subscription.hpp>
 #include <uORB/topics/parameter_update.h>
 
+#include <uORB/topics/my_task.h>
+
+#include <uORB/Publication.hpp>//arm加入
+#include <uORB/topics/actuator_armed.h>//arm加入
+#include <uORB/topics/vehicle_status.h>
+// #include "Arming/ArmStateMachine/ArmStateMachine.hpp"
+#include <modules/commander/Arming/ArmStateMachine/ArmStateMachine.hpp>
+
 using namespace time_literals;
 
 class PWMOut final : public ModuleBase<PWMOut>, public OutputModuleInterface
@@ -70,21 +78,28 @@ public:
 
 	/** @see ModuleBase::print_status() */
 	int print_status() override;
-
+	void sendActuatorArmed(bool armed, bool force_failsafe, bool manual_lockdown, bool prearm);//arm加入
 	bool updateOutputs(bool stop_motors, uint16_t outputs[MAX_ACTUATORS],
 			   unsigned num_outputs, unsigned num_control_groups_updated) override;
-
+	bool armed_f;
 private:
 	void Run() override;
 
 	void update_params();
 	bool update_pwm_out_state(bool on);
-
 	MixingOutput _mixing_output{PARAM_PREFIX, DIRECT_PWM_OUTPUT_CHANNELS, *this, MixingOutput::SchedulingPolicy::Auto, true};
 
 	int _timer_rates[MAX_IO_TIMERS] {};
+	uORB::Publication<actuator_armed_s>	_actuator_armed_pub{ORB_ID(actuator_armed)};//arm加入
+	uORB::Publication<vehicle_status_s>	_vehicle_status_pub{ORB_ID(vehicle_status)};//arm加入
 
-	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
+	uORB::SubscriptionInterval 	_parameter_update_sub{ORB_ID(parameter_update), 1_s};
+	uORB::Subscription 				_my_task_sub{ORB_ID(my_task)};
+
+	actuator_armed_s	 actuator_armed{};
+	vehicle_status_s	 _vehicle_status{};
+	ArmStateMachine		_arm_state_machine{};
+	my_task_s		my_task{};
 
 	unsigned	_num_outputs{DIRECT_PWM_OUTPUT_CHANNELS};
 
