@@ -21,7 +21,7 @@ float Kp,Ki,Kd;
 float integral;
 float umax;
 float umin;
-void PID_init()
+void My_pwm_out::PID_init()
 {
 	err = 0.0;
 	err_last = 0.0;
@@ -36,7 +36,7 @@ bool My_pwm_out::init()
 	ScheduleOnInterval(5000_us);//20msÎªÒ»ÖÜÆÚÔËĞĞ ¿¼ÂÇÔö´óÆµÂÊ 5msÊÔÊÔ
 	return true;
 }
-float PID_realize(float ActualSpeed,float speed)//Î»ÖÃÊ½
+float My_pwm_out::PID_realize(float ActualSpeed,float speed)//Î»ÖÃÊ½
 {
 	float Actualout;
 	err = speed-ActualSpeed;
@@ -45,11 +45,11 @@ float PID_realize(float ActualSpeed,float speed)//Î»ÖÃÊ½
 	err_last = err;
 	return Actualout;
 }
-void Press_PID(my_task_s &my_task,sensor_baro_s &sensor_baro)
+void My_pwm_out::Press_PID(my_task_s &my_task_param,sensor_baro_s &sensor_baro_param)
 {
-	if(my_task.task_num >= 2 && my_task.task_num <= 4 )//ÏŞÖµÖ´ĞĞÌõ¼ş
+	if(my_task_param.task_num >= 2 && my_task_param.task_num <= 4 )//ÏŞÖµÖ´ĞĞÌõ¼ş
 	{
-		my_task.output = LIMIT(1400-PID_realize(sensor_baro.pressure,my_task.barometer_ab-90),1325,1600);//Ô­150µÄÑ¹²î 35-50Ö®¼ä 42.5ÆğÊ¼ //120 150
+		my_task_param.output = LIMIT(1400-PID_realize(sensor_baro_param.pressure,my_task_param.barometer_ab-90),1325,1600);//Ô­150µÄÑ¹²î 35-50Ö®¼ä 42.5ÆğÊ¼ //120 150
 	}
 }
 void My_pwm_out::Run()
@@ -62,13 +62,6 @@ void My_pwm_out::Run()
 	perf_begin(_loop_perf);
 	perf_count(_loop_interval_perf);
 	Press_PID(my_task,sensor_baro);
-	// Check if parameters have changed
-	// if (_parameter_update_sub.updated()) {
-	// 	// clear update
-	// 	parameter_update_s param_update;
-	// 	_parameter_update_sub.copy(&param_update);
-	// 	updateParams(); // update module parameters (in DEFINE_PARAMETERS)
-	// }//ĞèÒª²ÎÊı¸üĞÂ´¥·¢Ê±Ê¹ÓÃ
 	const hrt_abstime time_stamp_now = hrt_absolute_time();
 	static uint8_t err_num,adsorb_num,stop_switch_num;
 	static uint16_t last_distance,pwm_out;//

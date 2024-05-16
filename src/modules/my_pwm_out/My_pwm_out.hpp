@@ -45,9 +45,10 @@ public:
 	bool init();
 
 	int print_status() override;
-
+	void Press_PID(my_task_s &my_task_param,sensor_baro_s &sensor_barok_param);
 private:
 	void Run() override;
+	void PID_init();
 	float PID_realize(float ActualSpeed,float speed);//Œª÷√ Ω
 
 	my_task_s				 my_task{};
@@ -60,7 +61,6 @@ private:
 	hrt_abstime				_time_stamp_last_loop{0};
 	// Publications
 	uORB::Publication<my_task_s>			_my_task_pub{ORB_ID(my_task)};
-	void Press_PID(my_task_s &my_task,sensor_baro_s &sensor_baro);
 	// Subscriptions
 	uORB::Subscription 				_my_task_sub{ORB_ID(my_task)};
 	uORB::Subscription 				_distance_sensor_sub{ORB_ID(distance_sensor)};
