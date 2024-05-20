@@ -33,7 +33,7 @@ void My_pwm_out::PID_init()
 
 bool My_pwm_out::init()
 {
-	ScheduleOnInterval(5000_us);//20ms为一周期运行 考虑增大频率 5ms试试
+	ScheduleOnInterval(5000_us);//5ms为一周期运行
 	return true;
 }
 float My_pwm_out::PID_realize(float ActualSpeed,float speed)//位置式
